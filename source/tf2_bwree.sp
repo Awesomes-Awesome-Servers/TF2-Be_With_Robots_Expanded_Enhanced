@@ -1933,10 +1933,12 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			
 			if (patient != -1 && BaseEntity_IsPlayer(patient) && GetClientTeam(patient) == GetClientTeam(client))
 			{
-				if (GetClientHealth(patient) >= RoundToFloor(TF2Util_GetPlayerMaxHealthBoost(patient) * 0.95))
+				int iPatientHealth = GetClientHealth(patient);
+				
+				if (iPatientHealth > TF2Util_GetEntityMaxHealth(patient))
 				{
-					//Keeping my teammate at max overheal
-					g_arrRobotPlayerStats[client].flOverhealTime += GetTickInterval();
+					//Keeping my teammate at overheal
+					g_arrRobotPlayerStats[client].flOverhealTime += GetTickInterval() * MinFloat(1.0, float(iPatientHealth) / float(TF2Util_GetPlayerMaxHealthBoost(patient)));
 				}
 				
 				if (GetEntProp(myWeapon, Prop_Send, "m_bChargeRelease"))
