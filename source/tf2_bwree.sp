@@ -336,6 +336,7 @@ enum struct esCSProperties
 	float flDmgForSecMult;
 	int iHealingForSec;
 	float flHealingForSecMult;
+	float flOverhealTimeMult;
 	float flCapturePointSec;
 	float flInvulnDeploySec;
 	float flSecPerSuccessiveRoundPlayed;
@@ -358,6 +359,7 @@ enum struct esCSProperties
 		this.flDmgForSecMult = 1.0;
 		this.iHealingForSec = 35;
 		this.flHealingForSecMult = 2.0;
+		this.flOverhealTimeMult = 0.1;
 		this.flCapturePointSec = 60.0;
 		this.flInvulnDeploySec = 60.0;
 		this.flSecPerSuccessiveRoundPlayed = 30.0;
@@ -1940,7 +1942,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				{
 					//Keeping my teammate at overheal
 					//The rate at which this fills up depends on how much of the player's overheal did we achieve
-					g_arrRobotPlayerStats[client].flOverhealTime += GetTickInterval() * MinFloat(5.0, float(iPatientHealth - iPatientMaxHealth) / float(TF2Util_GetPlayerMaxHealthBoost(patient, false, true) - GetMaxHealthForBuffing(patient)));
+					g_arrRobotPlayerStats[client].flOverhealTime += GetTickInterval() * MinFloat(100.0, float(iPatientHealth - iPatientMaxHealth) / float(TF2Util_GetPlayerMaxHealthBoost(patient, true, true) - GetMaxHealthForBuffing(patient)));
 				}
 				
 				if (GetEntProp(myWeapon, Prop_Send, "m_bChargeRelease"))
@@ -4340,6 +4342,11 @@ float GetPlayerCalculatedCooldown(int client, bool bQuit = false)
 		flTotalDuration += (float(g_arrRobotPlayerStats[client].iHealing) / float(g_arrCooldownSystem.iHealingForSec)) * g_arrCooldownSystem.flHealingForSecMult;
 	}
 	
+	if (g_arrRobotPlayerStats[client].flOverhealTime > 0.0)
+	{
+		flTotalDuration += g_arrRobotPlayerStats[client].flOverhealTime * g_arrCooldownSystem.flOverhealTimeMult;
+	}
+	
 	if (g_arrRobotPlayerStats[client].iPointCaptures > 0)
 	{
 		//Add a percentage of this duration based on the amount of points we capped versus the total amount we could have capped this round
@@ -5496,6 +5503,7 @@ void MainConfig_UpdateSettings()
 			g_arrCooldownSystem.flDmgForSecMult = kv.GetFloat("damage_for_one_second_multiplier", g_arrCooldownSystem.flDmgForSecMult);
 			g_arrCooldownSystem.iHealingForSec = kv.GetNum("healing_for_one_second", g_arrCooldownSystem.iHealingForSec);
 			g_arrCooldownSystem.flHealingForSecMult = kv.GetFloat("healing_for_one_second_multiplier", g_arrCooldownSystem.flHealingForSecMult);
+			g_arrCooldownSystem.flOverhealTimeMult = kv.GetFloat("overhealing_time_multiplier", g_arrCooldownSystem.flOverhealTimeMult);
 			g_arrCooldownSystem.flCapturePointSec = kv.GetFloat("points_captured_sec", g_arrCooldownSystem.flCapturePointSec);
 			g_arrCooldownSystem.flInvulnDeploySec = kv.GetFloat("invulnerable_deploy_sec", g_arrCooldownSystem.flInvulnDeploySec);
 			g_arrCooldownSystem.flSecPerSuccessiveRoundPlayed = kv.GetFloat("seconds_per_successive_round_played", g_arrCooldownSystem.flSecPerSuccessiveRoundPlayed);
