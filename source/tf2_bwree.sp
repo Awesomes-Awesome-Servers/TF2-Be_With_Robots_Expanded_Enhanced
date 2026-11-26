@@ -1206,7 +1206,7 @@ public Plugin myinfo =
 	name = PLUGIN_NAME,
 	author = "Officer Spy",
 	description = "Perhaps this is the true BWR experience?",
-	version = "1.5.6.1",
+	version = "1.5.6.2",
 	url = "https://github.com/OfficerSpy/TF2-Be-With-Robots-Expanded-Enhanced"
 };
 
@@ -1934,11 +1934,13 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			if (patient != -1 && BaseEntity_IsPlayer(patient) && GetClientTeam(patient) == GetClientTeam(client))
 			{
 				int iPatientHealth = GetClientHealth(patient);
+				int iPatientMaxHealth = TF2Util_GetEntityMaxHealth(patient);
 				
-				if (iPatientHealth > TF2Util_GetEntityMaxHealth(patient))
+				if (iPatientHealth > iPatientMaxHealth)
 				{
 					//Keeping my teammate at overheal
-					g_arrRobotPlayerStats[client].flOverhealTime += GetTickInterval() * MinFloat(1.0, float(iPatientHealth) / float(TF2Util_GetPlayerMaxHealthBoost(patient)));
+					//The rate at which this fills up depends on how much of the player's overheal did we achieve
+					g_arrRobotPlayerStats[client].flOverhealTime += GetTickInterval() * MinFloat(5.0, float(iPatientHealth - iPatientMaxHealth) / float(TF2Util_GetPlayerMaxHealthBoost(patient, false, true) - GetMaxHealthForBuffing(patient)));
 				}
 				
 				if (GetEntProp(myWeapon, Prop_Send, "m_bChargeRelease"))

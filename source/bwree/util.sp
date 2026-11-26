@@ -1925,3 +1925,8 @@ stock void HideAnnotationForClient(int client, int id)
 		hEvent.Cancel();
 	}
 }
+
+stock int GetMaxHealthForBuffing(int client)
+{
+	return GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxBuffedHealth", _, client);
+}
